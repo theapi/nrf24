@@ -176,27 +176,13 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
   return 0;
 }
 
-void parseSocketInput(char buf[MAX_SOCKET_BYTES])
+Nrf24Payload parseSocketInput(char buf[MAX_SOCKET_BYTES])
 {
-  //Nrf24Payload payload = Nrf24Payload();
-  /*
-  payload_t payload;
-
-  // Initialize to some default values
-  payload.device_id = '-';
-  payload.type = '-';
-  payload.timestamp = 0;
-  payload.msg_id = 0;
-  payload.vcc = 0;
-  payload.a = 0;
-  payload.b = 0;
-  payload.c = 0;
-  payload.d = 0;
-  payload.y = 0;
-  payload.z = 0;
-
-  payload.device_id = buf[0];
-  payload.type = buf[2];
+  Nrf24Payload payload = Nrf24Payload();
+  // Expects a csv string
+  // eg; p,t,1419870973,0,0,23,32767,32768,65534,65535
+  payload.setDeviceId(buf[0]);
+  payload.setType(buf[2]);
 
   int i = 0;
   char *token;
@@ -205,46 +191,35 @@ void parseSocketInput(char buf[MAX_SOCKET_BYTES])
     //printf("%i: %s\n", i, token);
     switch (i) {
       case 2:
-        payload.timestamp = atoi(token);
+        payload.setTimestamp(atoi(token));
         break;
       case 3:
-        payload.msg_id = atoi(token);
+        payload.setId(atoi(token));
         break;
       case 4:
-        payload.vcc = atoi(token);
+        payload.setVcc(atoi(token));
         break;
       case 5:
-        payload.a = atoi(token);
+        payload.setA(atoi(token));
         break;
       case 6:
-        payload.b = atoi(token);
+        payload.setB(atoi(token));
         break;
       case 7:
-        payload.c = atoi(token);
+        payload.setC(atoi(token));
         break;
       case 8:
-        payload.d = atoi(token);
+        payload.setD(atoi(token));
         break;
       case 9:
-        payload.y = atoi(token);
-        break;
-      case 10:
-        payload.z = atoi(token);
+        payload.setE(atoi(token));
         break;
     }
     i++;
     token = strtok(NULL, ",");
   }
-  */
-/*
-  printf("payload.device_id %c\n", payload.device_id);
-  printf("payload.type %c\n", payload.type);
-  printf("payload.timestamp %d\n", payload.timestamp);
-  printf("payload.msg_id %d\n", payload.msg_id);
-  printf("payload.vcc %d\n", payload.vcc);
-  printf("payload.a %d\n", payload.a);
-*/
-  //return payload;
+
+  return payload;
 }
 
 int readSocket(int sock)
@@ -269,7 +244,6 @@ int readSocket(int sock)
       return -1;
     }
 
-
     Nrf24Payload payload = Nrf24Payload();
     if (test_mode) {
       struct timeval tv;
@@ -285,7 +259,7 @@ int readSocket(int sock)
       payload.setC(32768);
       payload.setD(65534);
       payload.setE(65535); // Max size of uint16_t
-
+/*
       // Tmp test
       uint8_t buff[Nrf24Payload_SIZE];
       payload.serialize(buff);
@@ -294,11 +268,11 @@ int readSocket(int sock)
 
       // Dump it to screen
       printf("  test:%d %d %d %d\n", b_payload.getB(), b_payload.getC(), b_payload.getD(), b_payload.getE());
-
+*/
 
     } else {
       // The socket should be providing payload data.
-      //payload = parseSocketInput(buffer);
+      payload = parseSocketInput(buffer);
     }
 
     // Pass the message to the radios.
