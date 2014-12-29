@@ -169,7 +169,7 @@ void Nrf24Payload::unserialize(uint8_t payload[Nrf24Payload_SIZE])
   _payload.e = (payload[14] << 8) | payload[15];
 
   // Need to cast to unsigned long for the larger bit shift
-  _payload.timestamp = ((uint32_t)payload[16] << 24) | ((uint32_t)payload[17] << 16) | (payload[18] << 8) | payload[19];
+  _payload.timestamp = ((uint32_t)payload[16] << 24) | ((uint32_t)payload[17] << 16) | ((uint32_t)payload[18] << 8) | (uint32_t)payload[19];
 
 }
 
