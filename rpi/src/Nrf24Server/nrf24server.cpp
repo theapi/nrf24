@@ -71,6 +71,8 @@ const uint8_t pipes[][6] = {"1BASE", "2BASE", "3BASE", "4BASE", "5BASE"};
 uint8_t test_mode = 0;
 uint16_t msg_id = 0;
 
+int master_socket;
+fd_set active_fd_set;
 
 void error(const char *msg)
 {
@@ -79,7 +81,7 @@ void error(const char *msg)
 }
 
 /**
- * Send the 3 character response and check for failure.
+ * Send the response and check for failure.
  */
 bool respond(int sock, const char *msg)
 {
@@ -87,7 +89,7 @@ bool respond(int sock, const char *msg)
     // Pretent it was sent
     return 0;
   }
-  int n = write(sock, msg, 3);
+  int n = write(sock, msg, MAX_SOCKET_BYTES);
   if (n < 0) {
     error("ERROR writing to socket");
     return 0;
@@ -143,6 +145,9 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
     radio.openWritingPipe(radio_clients[i]);
 
     printf(" %s ", radio_clients[i]);
+    char respond_msg[MAX_SOCKET_BYTES];
+    bzero(respond_msg, MAX_SOCKET_BYTES);
+
 
     // NB: seems to be that it does not send the same message twice in a row
     // BUT radio.write still returns true AND the ack payload is the same as last time.
@@ -151,7 +156,8 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
     payload.serialize(tx_buffer);
     bool ok = radio.write( &tx_buffer, Nrf24Payload_SIZE);
     if (!ok) {
-      respond(sock, "504");
+      sprintf (respond_msg, ".,%d,%s\n", 504, radio_clients[i]);
+      respond(sock, respond_msg);
       printf("(0)");
     } else {
 
@@ -162,8 +168,8 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
         // just dump it to screen for now.
         printf("ack:%hd", ack_payload);
       }
-
-      respond(sock, "200");
+      sprintf (respond_msg, ".,%d,%s\n", 200, radio_clients[i]);
+      respond(sock, respond_msg);
       printf("(1)");
     }
 
@@ -174,6 +180,35 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
   printf("\n");
 
   return 0;
+}
+
+/**
+ * Sent it to all connected sockets
+ */
+void sendPayloadToSockets(Nrf24Payload payload)
+{
+  char buf[MAX_SOCKET_BYTES];
+  bzero(buf, MAX_SOCKET_BYTES);
+  sprintf (buf, ":,%c,%c,%d,%d,%d,%d,%d,%d,%d,%d\n",
+    payload.getDeviceId(),
+    payload.getType(),
+    payload.getTimestamp(),
+    payload.getId(),
+    payload.getVcc(),
+    payload.getA(),
+    payload.getB(),
+    payload.getC(),
+    payload.getD(),
+    payload.getE());
+
+  for (int i = 0; i < FD_SETSIZE; ++i) {
+    if (FD_ISSET (i, &active_fd_set) && i != master_socket) {
+      int n = write(i, buf, MAX_SOCKET_BYTES);
+      if (n < 0) {
+        error("ERROR writing to socket");
+      }
+    }
+  }
 }
 
 Nrf24Payload parseSocketInput(char buf[MAX_SOCKET_BYTES])
@@ -285,8 +320,8 @@ int main(int argc, char *argv[])
 {
   uint16_t port;
   extern int makeSocket(uint16_t port);
-  int sock;
-  fd_set active_fd_set, read_fd_set;
+
+  fd_set read_fd_set;
   int i;
   struct sockaddr_in clientname;
   size_t size;
@@ -314,15 +349,15 @@ int main(int argc, char *argv[])
   }
 
   // Create the socket and set it up to accept connections.
-  sock = makeSocket(port);
-  if (listen (sock, 1) < 0) {
+  master_socket = makeSocket(port);
+  if (listen (master_socket, 1) < 0) {
     perror ("listen");
     exit (EXIT_FAILURE);
   }
 
   // Initialize the set of active sockets.
   FD_ZERO (&active_fd_set);
-  FD_SET (sock, &active_fd_set);
+  FD_SET (master_socket, &active_fd_set);
 
   // Allow select to block for 200000 us
   tv.tv_sec = 0;
@@ -370,11 +405,11 @@ int main(int argc, char *argv[])
     // Service all the sockets with input pending
     for (i = 0; i < FD_SETSIZE; ++i) {
       if (FD_ISSET (i, &read_fd_set)) {
-        if (i == sock) {
+        if (i == master_socket) {
           // Connection request on original socket.
           int new_client;
           size = sizeof (clientname);
-          new_client = accept (sock,
+          new_client = accept (master_socket,
                         (struct sockaddr *) &clientname,
                         &size);
           if (new_client < 0) {
@@ -411,6 +446,8 @@ int main(int argc, char *argv[])
       printf("payload:%c %c %d\n", rx_payload.getDeviceId(), rx_payload.getType(), rx_payload.getId());
       // Tell all who care
       sendPayloadToRadios(rx_payload, 0);
+      sendPayloadToSockets(rx_payload);
+
     }
 
   }
