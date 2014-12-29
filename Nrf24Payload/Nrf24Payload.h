@@ -1,15 +1,17 @@
 /*
-  Protocol.h - Library for the communication protocol being used for the nrf24 network.
+  Nrf24Payload.h - Library for defining the payload datastructure for the NRF24 network.
 
   Created by Peter Clarke.
 */
-#ifndef Nrf24Protocol_h
-#define Nrf24Protocol_h
+#ifndef Nrf24Payload_h
+#define Nrf24Payload_h
 
 // Provides the correct headers for Arduino or Rapberry Pi
 #include "RF24_config.h"
 
-class Nrf24Protocol
+#define Nrf24Payload_SIZE 20
+
+class Nrf24Payload
 {
   public:
     typedef struct{
@@ -20,14 +22,13 @@ class Nrf24Protocol
       uint16_t b;
       uint16_t c;
       uint16_t d;
+      uint16_t e;
       uint8_t type;
       uint8_t device_id;
-      int8_t y;
-      int8_t z;
     }
     payload_t;
 
-    Nrf24Protocol(uint8_t device_id);
+    Nrf24Payload();
 
     // How big the radion payload is.
     uint8_t getPayloadSize();
@@ -68,23 +69,18 @@ class Nrf24Protocol
     uint16_t getD();
     void setD(uint16_t val);
 
-    // The first char data
-    int8_t getY();
-    void setY(int8_t val);
-
-    // The second char data
-    int8_t getZ();
-    void setZ(int8_t val);
+    // The fith integer data
+    uint16_t getE();
+    void setE(uint16_t val);
 
     // Creates a byte array for sending via the radio
-    void serialize(uint8_t payload[20]);
+    void serialize(uint8_t payload[Nrf24Payload_SIZE]);
 
     // Parse the read byte data from the radio
-    void unserialize(uint8_t payload[20]);
+    void unserialize(uint8_t payload[Nrf24Payload_SIZE]);
 
   private:
-    payload_t _payload_out;
-    payload_t _payload_in;
+    payload_t _payload;
 
 };
 
