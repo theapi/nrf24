@@ -6,8 +6,7 @@
 #ifndef Nrf24Payload_h
 #define Nrf24Payload_h
 
-// Provides the correct headers for Arduino or Rapberry Pi
-#include "RF24_config.h"
+#include <stdint.h>
 
 #define Nrf24Payload_SIZE 20
 

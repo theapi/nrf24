@@ -104,7 +104,7 @@ uint16_t Nrf24Payload::getC()
 
 void Nrf24Payload::setC(uint16_t val)
 {
-  _payload.d = val;
+  _payload.c = val;
 }
 
 // The forth integer data
