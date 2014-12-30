@@ -8,20 +8,18 @@
 
 #include <stdint.h>
 
-#define Nrf24Payload_SIZE 20
+#define Nrf24Payload_SIZE 14
 
 class Nrf24Payload
 {
   public:
     typedef struct{
-      uint32_t timestamp;
       uint16_t msg_id;
       uint16_t vcc;
       uint16_t a;
       uint16_t b;
       uint16_t c;
       uint16_t d;
-      uint16_t e;
       uint8_t type;
       uint8_t device_id;
     }
@@ -44,10 +42,6 @@ class Nrf24Payload
     uint8_t getType();
     void setType(uint8_t type);
 
-    // The timestamp given to the message by the sender.
-    uint32_t getTimestamp();
-    void setTimestamp(uint32_t ts);
-
     // The millivolts reported by the device in the message
     uint16_t getVcc();
     void setVcc(uint16_t vcc);
@@ -67,10 +61,6 @@ class Nrf24Payload
     // The forth integer data
     uint16_t getD();
     void setD(uint16_t val);
-
-    // The fith integer data
-    uint16_t getE();
-    void setE(uint16_t val);
 
     // Creates a byte array for sending via the radio
     void serialize(uint8_t payload[Nrf24Payload_SIZE]);

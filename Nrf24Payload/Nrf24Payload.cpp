@@ -5,14 +5,12 @@ Nrf24Payload::Nrf24Payload()
 {
   _payload.device_id = '-';
   _payload.type = '-';
-  _payload.timestamp = 0;
   _payload.msg_id = 0;
   _payload.vcc = 0;
   _payload.a = 0;
   _payload.b = 0;
   _payload.c = 0;
   _payload.d = 0;
-  _payload.e = 0;
 }
 
 uint8_t Nrf24Payload::getPayloadSize()
@@ -50,17 +48,6 @@ uint8_t Nrf24Payload::getType()
 void Nrf24Payload::setType(uint8_t type)
 {
   _payload.type = type;
-}
-
-// The timestamp given to the message by the sender.
-uint32_t Nrf24Payload::getTimestamp()
-{
-  return _payload.timestamp;
-}
-
-void Nrf24Payload::setTimestamp(uint32_t ts)
-{
-  _payload.timestamp = ts;
 }
 
 // The millivolts reported by the device in the message
@@ -118,17 +105,6 @@ void Nrf24Payload::setD(uint16_t val)
   _payload.d = val;
 }
 
-// The fith integer data
-uint16_t Nrf24Payload::getE()
-{
-  return _payload.e;
-}
-
-void Nrf24Payload::setE(uint16_t val)
-{
-  _payload.e = val;
-}
-
 // Populates the given array with the payload data
 void Nrf24Payload::serialize(uint8_t payload[Nrf24Payload_SIZE])
 {
@@ -146,13 +122,13 @@ void Nrf24Payload::serialize(uint8_t payload[Nrf24Payload_SIZE])
   payload[11] = _payload.c;
   payload[12] = (_payload.d >> 8);
   payload[13] = _payload.d;
-  payload[14] = (_payload.e >> 8);
-  payload[15] = _payload.e;
 
+/*
   payload[16] = (_payload.timestamp >> 24);
   payload[17] = (_payload.timestamp >> 16);
   payload[18] = (_payload.timestamp >> 8);
   payload[19] = _payload.timestamp;
+*/
 }
 
 // Parse the read byte data from the radio
@@ -166,10 +142,9 @@ void Nrf24Payload::unserialize(uint8_t payload[Nrf24Payload_SIZE])
   _payload.b = (payload[8] << 8) | payload[9];
   _payload.c = (payload[10] << 8) | payload[11];
   _payload.d = (payload[12] << 8) | payload[13];
-  _payload.e = (payload[14] << 8) | payload[15];
 
   // Need to cast to unsigned long for the larger bit shift
-  _payload.timestamp = ((uint32_t)payload[16] << 24) | ((uint32_t)payload[17] << 16) | ((uint32_t)payload[18] << 8) | (uint32_t)payload[19];
+  //_payload.timestamp = ((uint32_t)payload[16] << 24) | ((uint32_t)payload[17] << 16) | ((uint32_t)payload[18] << 8) | (uint32_t)payload[19];
 
 }
 
