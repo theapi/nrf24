@@ -146,7 +146,6 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
     char respond_msg[MAX_SOCKET_BYTES];
     bzero(respond_msg, MAX_SOCKET_BYTES);
 
-
     // NB: seems to be that it does not send the same message twice in a row
     // BUT radio.write still returns true AND the ack payload is the same as last time.
 
@@ -158,14 +157,6 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
       respond(sock, respond_msg);
       printf("(0)");
     } else {
-
-      // If an ack with payload of 2 bytes was received
-      while (radio.available()) {
-        short ack_payload;
-        radio.read( &ack_payload, sizeof(ack_payload));
-        // just dump it to screen for now.
-        printf("ack:%hd", ack_payload);
-      }
       sprintf (respond_msg, ".,%d,%s\n", 200, radio_clients[i]);
       respond(sock, respond_msg);
       printf("(1)");
@@ -271,8 +262,6 @@ int readSocket(int sock)
 
     Nrf24Payload payload = Nrf24Payload();
     if (test_mode) {
-      //struct timeval tv;
-      //gettimeofday(&tv,NULL);
 
       // Pretty much hardcoded payload except for atoi(buffer)
       payload.setDeviceId('P'); // P for Pi
@@ -362,8 +351,6 @@ int main(int argc, char *argv[])
   radio.setPayloadSize(Nrf24Payload_SIZE);
   // Ensure autoACK is enabled
   radio.setAutoAck(1);
-  // Allow optional ack payloads
-  radio.enableAckPayload();
   // Try a few times to get the message through
   radio.setRetries(0,15);
 
@@ -431,7 +418,8 @@ int main(int argc, char *argv[])
       rx_payload.unserialize(rx);
 
       // Dump it to screen
-      printf("payload:%c %c %d\n", rx_payload.getDeviceId(), rx_payload.getType(), rx_payload.getId());
+      //printf("payload:%c %c %d\n", rx_payload.getDeviceId(), rx_payload.getType(), rx_payload.getId());
+
       // Tell all who care
       sendPayloadToRadios(rx_payload, 0);
       sendPayloadToSockets(rx_payload);
