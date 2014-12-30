@@ -126,17 +126,15 @@ int makeSocket(uint16_t port)
  */
 int sendPayloadToRadios(Nrf24Payload payload, int sock)
 {
-  printf ("Sending: %c %c %d %d %d %d %d %d %d %d \n",
+  printf ("Sending: %c %c %d %d %d %d %d %d \n",
     payload.getDeviceId(),
     payload.getType(),
-    payload.getTimestamp(),
     payload.getId(),
     payload.getVcc(),
     payload.getA(),
     payload.getB(),
     payload.getC(),
-    payload.getD(),
-    payload.getE());
+    payload.getD());
 
 
   for (int i = 0; i < num_clients; i++) {
@@ -189,17 +187,15 @@ void sendPayloadToSockets(Nrf24Payload payload)
 {
   char buf[MAX_SOCKET_BYTES];
   bzero(buf, MAX_SOCKET_BYTES);
-  sprintf (buf, ":,%c,%c,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  sprintf (buf, ":,%c,%c,%d,%d,%d,%d,%d,%d\n",
     payload.getDeviceId(),
     payload.getType(),
-    payload.getTimestamp(),
     payload.getId(),
     payload.getVcc(),
     payload.getA(),
     payload.getB(),
     payload.getC(),
-    payload.getD(),
-    payload.getE());
+    payload.getD());
 
   for (int i = 0; i < FD_SETSIZE; ++i) {
     if (FD_ISSET (i, &active_fd_set) && i != master_socket) {
@@ -215,7 +211,7 @@ Nrf24Payload parseSocketInput(char buf[MAX_SOCKET_BYTES])
 {
   Nrf24Payload payload = Nrf24Payload();
   // Expects a csv string
-  // eg; p,t,1419870973,0,0,23,32767,32768,65534,65535
+  // eg; p,t,0,0,23,32767,32768,65534,65535
   payload.setDeviceId(buf[0]);
   payload.setType(buf[2]);
 
@@ -226,28 +222,22 @@ Nrf24Payload parseSocketInput(char buf[MAX_SOCKET_BYTES])
     //printf("%i: %s\n", i, token);
     switch (i) {
       case 2:
-        payload.setTimestamp(atoi(token));
-        break;
-      case 3:
         payload.setId(atoi(token));
         break;
-      case 4:
+      case 3:
         payload.setVcc(atoi(token));
         break;
-      case 5:
+      case 4:
         payload.setA(atoi(token));
         break;
-      case 6:
+      case 5:
         payload.setB(atoi(token));
         break;
-      case 7:
+      case 6:
         payload.setC(atoi(token));
         break;
-      case 8:
+      case 7:
         payload.setD(atoi(token));
-        break;
-      case 9:
-        payload.setE(atoi(token));
         break;
     }
     i++;
@@ -281,19 +271,17 @@ int readSocket(int sock)
 
     Nrf24Payload payload = Nrf24Payload();
     if (test_mode) {
-      struct timeval tv;
-      gettimeofday(&tv,NULL);
+      //struct timeval tv;
+      //gettimeofday(&tv,NULL);
 
       // Pretty much hardcoded payload except for atoi(buffer)
       payload.setDeviceId('P'); // P for Pi
       payload.setType('T'); // test mode
-      payload.setTimestamp(tv.tv_sec);
       payload.setId(msg_id++);
       payload.setA(atoi(buffer)); // Just create an int from whatever came in
-      payload.setB(32767);
+      payload.setB(255);
       payload.setC(32768);
-      payload.setD(65534);
-      payload.setE(65535); // Max size of uint16_t
+      payload.setD(65535); // Max size of uint16_t
 /*
       // Tmp test
       uint8_t buff[Nrf24Payload_SIZE];
@@ -302,7 +290,7 @@ int readSocket(int sock)
       b_payload.unserialize(buff);
 
       // Dump it to screen
-      printf("  test:%d %d %d %d\n", b_payload.getB(), b_payload.getC(), b_payload.getD(), b_payload.getE());
+      printf("  test:%d %d %d %d\n", b_payload.getA(), b_payload.getB(), b_payload.getC(), b_payload.getD());
 */
 
     } else {
