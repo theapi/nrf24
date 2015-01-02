@@ -91,7 +91,7 @@ bool respond(int sock, const char *msg)
   }
   int n = write(sock, msg, MAX_SOCKET_BYTES);
   if (n < 0) {
-    error("ERROR writing to socket");
+    perror("ERROR writing to socket");
     return 0;
   }
   return 1;
@@ -192,7 +192,7 @@ void sendPayloadToSockets(Nrf24Payload payload)
     if (FD_ISSET (i, &active_fd_set) && i != master_socket) {
       int n = write(i, buf, MAX_SOCKET_BYTES);
       if (n < 0) {
-        error("ERROR writing to socket");
+        perror("ERROR writing to socket");
       }
     }
   }
@@ -248,7 +248,7 @@ int readSocket(int sock)
   if (nbytes < 0) {
       // Read error.
       perror ("read");
-      exit (EXIT_FAILURE);
+      return -1;
   } else if (nbytes == 0) {
     // End-of-file.
     return -1;
@@ -389,7 +389,6 @@ int main(int argc, char *argv[])
                         &size);
           if (new_client < 0) {
             perror ("accept");
-            exit (EXIT_FAILURE);
           }
           printf("Server: connect from host %s, port %hd.\n",
                 inet_ntoa (clientname.sin_addr),
