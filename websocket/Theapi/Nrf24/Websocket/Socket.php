@@ -1,11 +1,5 @@
 <?php
-//namespace Theapi\Nrf24\Websocket;
-
-//require '../client/Client.php'; 
-
-//use Theapi\Nrf24\Client as Nrf24Clent;
-
-
+namespace Theapi\Nrf24\Websocket;
 
 class Socket 
 {

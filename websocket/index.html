@@ -74,7 +74,8 @@ function reconnect() {
 
 // Utilities
 function $(id){ return document.getElementById(id); }
-function log(msg){ $("log").innerHTML+="<pre>"+msg+"</pre>"; }
+// Prepend the message so latest is always at the top
+function log(msg){ $("log").innerHTML = "<pre>"+msg+"</pre>" + $("log").innerHTML; }
 function onkey(event){ if(event.keyCode==13){ send(); } }
 </script>
 

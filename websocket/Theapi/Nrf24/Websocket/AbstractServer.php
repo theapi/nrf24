@@ -1,10 +1,9 @@
 <?php
+namespace Theapi\Nrf24\Websocket;
 
 // Adapted from https://github.com/ghedipunk/PHP-Websockets
+abstract class AbstractServer {
 
-abstract class WebSocketServer {
-
-  protected $userClass = 'WebSocketUser'; // redefine this if you want a custom user class.  The custom user class should inherit from WebSocketUser.
   protected $maxBufferSize;        
   protected $master;
   protected $sockets                              = array();
@@ -131,7 +130,7 @@ abstract class WebSocketServer {
   }
 
   protected function connect($socket) {
-    $user = new $this->userClass(uniqid('u'), $socket);
+    $user = new User(uniqid('u'), $socket);
     $this->users[$user->id] = $user;
     $this->sockets[$user->id] = $socket;
     $this->connecting($user);
@@ -538,25 +537,3 @@ abstract class WebSocketServer {
     echo ")\n";
   }
 }
-
-class WebSocketUser {
-
-  public $socket;
-  public $id;
-  public $headers = array();
-  public $handshake = false;
-
-  public $handlingPartialPacket = false;
-  public $partialBuffer = "";
-
-  public $sendingContinuous = false;
-  public $partialMessage = "";
-  
-  public $hasSentClose = false;
-
-  function __construct($id, $socket) {
-    $this->id = $id;
-    $this->socket = $socket;
-  }
-}
-
