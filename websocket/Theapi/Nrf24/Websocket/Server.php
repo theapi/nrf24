@@ -17,11 +17,9 @@ class Server extends AbstractServer
     while(true) {
       
       if ($message = $this->socket->loop()) {
-		// Send it through the socket.
-		// todo: sanitation
-		$this->socket->write($message);
+		
         foreach ($this->users as $user) {
-          $this->process($user, $message);
+          $this->send($user, $message);
         }
       }
       
@@ -31,7 +29,11 @@ class Server extends AbstractServer
   
   protected function process ($user, $message) 
   {
-    $this->send($user, $message);
+	// Send it through the socket.
+    // todo: sanitation
+
+    //$this->send($user, $message);
+    $this->socket->write($message);
   }
   
   protected function connected ($user) {}
