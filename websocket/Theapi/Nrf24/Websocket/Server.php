@@ -17,6 +17,9 @@ class Server extends AbstractServer
     while(true) {
       
       if ($message = $this->socket->loop()) {
+		// Send it through the socket.
+		// todo: sanitation
+		$this->socket->write($message);
         foreach ($this->users as $user) {
           $this->process($user, $message);
         }

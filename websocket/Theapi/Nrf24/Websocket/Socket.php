@@ -43,6 +43,13 @@ class Socket
     
     return false;
   }
+  
+  public function write($msg)
+  {
+	$len = strlen($msg);
+	// todo check whole message was sent
+    socket_write($this->sock, $msg, $len);
+  }
    
 }
 
