@@ -77,24 +77,24 @@ fd_set active_fd_set;
 void error(const char *msg)
 {
   perror(msg);
-  exit(1);
+  //exit(1);
 }
 
 /**
  * Send the response and check for failure.
  */
-bool respond(int sock, const char *msg)
+void respond(int sock, const char *msg)
 {
   if (sock < 1) {
     // Pretent it was sent
-    return 0;
+    return;
   }
   int n = write(sock, msg, MAX_SOCKET_BYTES);
   if (n < 0) {
-    perror("ERROR writing to socket");
-    return 0;
+    perror("Oops, ERROR writing to socket");
+    return;
   }
-  return 1;
+  return;
 }
 
 int makeSocket(uint16_t port)
@@ -154,11 +154,11 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
     bool ok = radio.write( &tx_buffer, Nrf24Payload_SIZE);
     if (!ok) {
       sprintf (respond_msg, ".,%d,%s\n", 504, radio_clients[i]);
-      respond(sock, respond_msg);
+      //respond(sock, respond_msg);
       printf("(0)");
     } else {
       sprintf (respond_msg, ".,%d,%s\n", 200, radio_clients[i]);
-      respond(sock, respond_msg);
+      //respond(sock, respond_msg);
       printf("(1)");
     }
 
@@ -192,7 +192,7 @@ void sendPayloadToSockets(Nrf24Payload payload)
     if (FD_ISSET (i, &active_fd_set) && i != master_socket) {
       int n = write(i, buf, MAX_SOCKET_BYTES);
       if (n < 0) {
-        perror("ERROR writing to socket");
+        perror("sendPayloadToSockets ERROR writing to socket");
       }
     }
   }
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
     read_fd_set = active_fd_set;
     if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, &tv) < 0) {
       perror ("select");
-      exit (EXIT_FAILURE);
+      //exit (EXIT_FAILURE);
     }
 
     // Service all the sockets with input pending
