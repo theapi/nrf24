@@ -202,7 +202,7 @@ Nrf24Payload parseSocketInput(char buf[MAX_SOCKET_BYTES])
 {
   Nrf24Payload payload = Nrf24Payload();
   // Expects a csv string
-  // eg; p,t,0,0,23,32767,32768,65534,65535
+  // eg; p,t,0,0,23,32767,32768,65535
   payload.setDeviceId(buf[0]);
   payload.setType(buf[2]);
 
@@ -287,6 +287,7 @@ int readSocket(int sock)
       payload = parseSocketInput(buffer);
     }
 
+    sendPayloadToSockets(payload);
     // Pass the message to the radios.
     return sendPayloadToRadios(payload, sock);
   }
