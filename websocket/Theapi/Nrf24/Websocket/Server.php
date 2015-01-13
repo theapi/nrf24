@@ -31,7 +31,11 @@ class Server extends AbstractServer
   {
 	// Send it through the socket.
     // todo: sanitation
-
+/*
+    foreach ($this->users as $user) {
+          $this->send($user, $message);
+        }
+    */
     //$this->send($user, $message);
     $this->socket->write($message);
   }
