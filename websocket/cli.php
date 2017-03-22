@@ -7,9 +7,9 @@ spl_autoload_register(function ($class) {
 });
 
 // Open a reqular socket to the nrf24 server
-$nrf24 = new Socket('192.168.0.137', 2000);
+$nrf24 = new Socket('192.168.0.22', 2000);
 // Start the websocket server
-$websocket = new Server("192.168.0.11", "8080", $nrf24);
+$websocket = new Server("192.168.0.22", "8080", $nrf24);
 
 try {
   $websocket->run();

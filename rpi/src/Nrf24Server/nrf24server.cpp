@@ -176,6 +176,17 @@ int sendPayloadToRadios(Nrf24Payload payload, int sock)
  */
 void sendPayloadToSockets(Nrf24Payload payload)
 {
+
+printf ("Sending to socket:,%c,%c,%d,%d,%d,%d,%d,%d\n",
+    payload.getDeviceId(),
+    payload.getType(),
+    payload.getId(),
+    payload.getVcc(),
+    payload.getA(),
+    payload.getB(),
+    payload.getC(),
+    payload.getD());
+
   char buf[MAX_SOCKET_BYTES];
   bzero(buf, MAX_SOCKET_BYTES);
   sprintf (buf, ":,%c,%c,%d,%d,%d,%d,%d,%d\n",
@@ -190,6 +201,7 @@ void sendPayloadToSockets(Nrf24Payload payload)
 
   for (int i = 0; i < FD_SETSIZE; ++i) {
     if (FD_ISSET (i, &active_fd_set) && i != master_socket) {
+printf ("socket:%d\n",i);
       int n = write(i, buf, MAX_SOCKET_BYTES);
       if (n < 0) {
         perror("sendPayloadToSockets ERROR writing to socket");
@@ -418,7 +430,7 @@ int main(int argc, char *argv[])
       rx_payload.unserialize(rx);
 
       // Dump it to screen
-      //printf("payload:%c %c %d\n", rx_payload.getDeviceId(), rx_payload.getType(), rx_payload.getId());
+      printf("payload:%c %c %d\n", rx_payload.getDeviceId(), rx_payload.getType(), rx_payload.getId());
 
       // Tell all who care
       sendPayloadToRadios(rx_payload, 0);
